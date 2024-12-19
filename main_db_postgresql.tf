@@ -18,9 +18,10 @@ resource "azurerm_resource_group" "pokecloud" {
 }
 
 resource "azurerm_postgresql_flexible_server" "pokecloud" {
-  name                = "pokecloudpgserver" # Nom du serveur PostgreSQL
-  location            = azurerm_resource_group.pokecloud.location
-  resource_group_name = azurerm_resource_group.pokecloud.name
+  name                          = "pokecloudpgserver" # Nom du serveur PostgreSQL
+  location                      = azurerm_resource_group.pokecloud.location
+  resource_group_name           = azurerm_resource_group.pokecloud.name
+  public_network_access_enabled = true # TODO: make it work
 
   administrator_login          = "adminuser"       # Identifiant admin
   administrator_password       = "P@ssw0rd1234!"   # Mot de passe (personnalisable avec précaution)
@@ -36,6 +37,15 @@ resource "azurerm_postgresql_flexible_server_database" "pokecloud" {
   server_id = azurerm_postgresql_flexible_server.pokecloud.id
   charset   = "utf8"       # Jeu de caractères
   collation = "en_US.utf8" # Collation
+}
+
+
+# Allow connections from other Azure Services
+resource "azurerm_postgresql_flexible_server_firewall_rule" "postgresql_server_fw" {
+  name             = "pokecloudpgserver-fw"
+  server_id        = azurerm_postgresql_flexible_server.pokecloud.id
+  start_ip_address = "0.0.0.0"
+  end_ip_address   = "0.0.0.0"
 }
 
 resource "azurerm_container_app_environment" "backendenv" {
@@ -127,8 +137,8 @@ resource "azurerm_container_app" "backend" {
     container {
       name   = "collection"
       image  = "ghcr.io/projet-app-cloud-dev/${each.key}:main"
-      cpu    = 0.25
-      memory = "0.5Gi"
+      cpu    = 0.5
+      memory = "1Gi"
       env {
         name  = "DB_USERNAME"
         value = azurerm_postgresql_flexible_server.pokecloud.administrator_login
