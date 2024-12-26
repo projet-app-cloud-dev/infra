@@ -17,6 +17,20 @@ resource "azurerm_resource_group" "pokecloud" {
   location = "France Central"      # Localisation de la ressource
 }
 
+resource "azurerm_log_analytics_workspace" "pokecloud-workspace" {
+  name                = "pokecloud-workspace"
+  location            = azurerm_resource_group.pokecloud.location
+  resource_group_name = azurerm_resource_group.pokecloud.name
+}
+
+resource "azurerm_application_insights" "pokecloud-insights" {
+  name                = "pokecloud-insights"
+  location            = azurerm_resource_group.pokecloud.location
+  resource_group_name = azurerm_resource_group.pokecloud.name
+  workspace_id        = azurerm_log_analytics_workspace.pokecloud-workspace.id
+  application_type    = "other"
+}
+
 resource "azurerm_postgresql_flexible_server" "pokecloud" {
   name                          = "pokecloudpgserver" # Nom du serveur PostgreSQL
   location                      = azurerm_resource_group.pokecloud.location
@@ -57,7 +71,7 @@ resource "azurerm_container_app_environment" "backendenv" {
     azurerm_postgresql_flexible_server.pokecloud
   ]
 
-  // log_analytics_workspace_id = azurerm_log_analytics_workspace.example.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.pokecloud-workspace.id
 }
 
 resource "azurerm_container_app" "backend-proxy" {
@@ -158,6 +172,10 @@ resource "azurerm_container_app" "backend" {
       env {
         name  = "JWT_KEY"
         value = random_bytes.jwt_secret.base64
+      }
+      env {
+        name  = "APP_INSIGHTS"
+        value = azurerm_application_insights.pokecloud-insights.connection_string
       }
     }
   }
