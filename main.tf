@@ -9,22 +9,26 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
 }
 
 resource "azurerm_resource_group" "pokecloud" {
-  name     = "pokecloud-resources" # Nom du groupe de ressources
-  location = "France Central"      # Localisation de la ressource
+  name     = "pokecloud-resources-${terraform.workspace}" # Nom du groupe de ressources
+  location = var.location                                 # Localisation de la ressource
 }
 
 resource "azurerm_log_analytics_workspace" "pokecloud-workspace" {
-  name                = "pokecloud-workspace"
+  name                = "pokecloud-workspace-${terraform.workspace}"
   location            = azurerm_resource_group.pokecloud.location
   resource_group_name = azurerm_resource_group.pokecloud.name
 }
 
 resource "azurerm_application_insights" "pokecloud-insights" {
-  name                = "pokecloud-insights"
+  name                = "pokecloud-insights-${terraform.workspace}"
   location            = azurerm_resource_group.pokecloud.location
   resource_group_name = azurerm_resource_group.pokecloud.name
   workspace_id        = azurerm_log_analytics_workspace.pokecloud-workspace.id

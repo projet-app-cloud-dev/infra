@@ -1,5 +1,5 @@
 resource "azurerm_container_app_environment" "backendenv" {
-  name                = "backend-env"
+  name                = "pokecloud-backend-env-${terraform.workspace}"
   location            = azurerm_resource_group.pokecloud.location
   resource_group_name = azurerm_resource_group.pokecloud.name
 
@@ -11,7 +11,7 @@ resource "azurerm_container_app_environment" "backendenv" {
 }
 
 resource "azurerm_container_app" "backend-proxy" {
-  name                         = "backend-proxy"
+  name                         = "pokecloud-backend-proxy-${terraform.workspace}"
   container_app_environment_id = azurerm_container_app_environment.backendenv.id
   resource_group_name          = azurerm_resource_group.pokecloud.name
   revision_mode                = "Single"
@@ -40,7 +40,7 @@ resource "azurerm_container_app" "backend-proxy" {
   template {
     container {
       name   = "proxy"
-      image  = "ghcr.io/projet-app-cloud-dev/proxy:latest"
+      image  = "ghcr.io/projet-app-cloud-dev/proxy:${terraform.workspace == "prod" ? var.proxy_prod_version : "main"}"
       cpu    = 0.25
       memory = "0.5Gi"
     }
@@ -57,7 +57,11 @@ resource "azurerm_container_app" "backend" {
   resource_group_name          = azurerm_resource_group.pokecloud.name
   revision_mode                = "Single"
 
-  for_each = toset(["auth", "collection", "cards"])
+  for_each = tomap({
+    "auth"       = terraform.workspace == "prod" ? var.auth_prod_version : "main",
+    "collection" = terraform.workspace == "prod" ? var.collection_prod_version : "main",
+    "cards"      = terraform.workspace == "prod" ? var.cards_prod_version : "main"
+  })
 
   secret {
     name  = "ghcr-password"
@@ -83,8 +87,8 @@ resource "azurerm_container_app" "backend" {
 
   template {
     container {
-      name   = "collection"
-      image  = "ghcr.io/projet-app-cloud-dev/${each.key}:main"
+      name   = "pokecloud-backend-${each.key}-${terraform.workspace}"
+      image  = "ghcr.io/projet-app-cloud-dev/${each.key}:${each.value}"
       cpu    = 0.75
       memory = "1.5Gi"
       env {

@@ -1,5 +1,5 @@
 resource "azurerm_postgresql_flexible_server" "pokecloud" {
-  name                          = "pokecloudpgserver" # Nom du serveur PostgreSQL
+  name                          = "pokecloud-db-server-${terraform.workspace}" # Nom du serveur PostgreSQL
   location                      = azurerm_resource_group.pokecloud.location
   resource_group_name           = azurerm_resource_group.pokecloud.name
   public_network_access_enabled = true # TODO: make it work
@@ -23,7 +23,7 @@ resource "azurerm_postgresql_flexible_server" "pokecloud" {
 }
 
 resource "azurerm_postgresql_flexible_server_database" "pokecloud" {
-  name      = "pokeclouddb" # Nom de la base de données
+  name      = "pokecloud-db-${terraform.workspace}" # Nom de la base de données
   server_id = azurerm_postgresql_flexible_server.pokecloud.id
   charset   = "utf8"       # Jeu de caractères
   collation = "en_US.utf8" # Collation
@@ -32,7 +32,7 @@ resource "azurerm_postgresql_flexible_server_database" "pokecloud" {
 
 # Allow connections from other Azure Services
 resource "azurerm_postgresql_flexible_server_firewall_rule" "postgresql_server_fw" {
-  name             = "pokecloudpgserver-fw"
+  name             = "pokecloud-db-fw-${terraform.workspace}"
   server_id        = azurerm_postgresql_flexible_server.pokecloud.id
   start_ip_address = "0.0.0.0"
   end_ip_address   = "0.0.0.0"

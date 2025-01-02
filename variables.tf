@@ -1,35 +1,27 @@
-variable "resource_group_name" {
-  default = "pokecloud-resources"
+variable "proxy_prod_version" {
+  type    = string
+  default = "v0.2.1"
+}
+
+variable "auth_prod_version" {
+  type    = string
+  default = "v0.2.0"
+}
+
+variable "cards_prod_version" {
+  type    = string
+  default = "v0.2.0"
+}
+
+variable "collection_prod_version" {
+  type    = string
+  default = "v0.1.0"
 }
 
 variable "location" {
-  default = "West Europe"
+  type    = string
+  default = "France Central"
 }
-
-variable "server_name" {
-  default = "pokecloudpgserver"
-}
-
-variable "admin_user" {
-  default = "adminuser"
-}
-
-variable "database_name" {
-  default = "pokeclouddb"
-}
-
-variable "resource_group_location" {
-  type        = string
-  default     = "westeurope"
-  description = "Location of the resource group."
-}
-
-variable "resource_group_name_prefix" {
-  type        = string
-  default     = "rg-cloud"
-  description = "Prefix of the resource group name that's combined with a random ID so name is unique in your Azure subscription."
-}
-
 
 variable "ghcr_username" {
   description = "Github packages username"
