@@ -42,9 +42,3 @@ variable "ghcr_password" {
   type        = string
   sensitive   = true
 }
-
-variable "tgc_api_key" {
-  description = "The api key for the tgc api"
-  type        = string
-  sensitive   = true
-}

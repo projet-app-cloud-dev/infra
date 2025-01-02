@@ -85,8 +85,8 @@ resource "azurerm_container_app" "backend" {
     container {
       name   = "collection"
       image  = "ghcr.io/projet-app-cloud-dev/${each.key}:main"
-      cpu    = 0.5
-      memory = "1Gi"
+      cpu    = 0.75
+      memory = "1.5Gi"
       env {
         name  = "DB_USERNAME"
         value = azurerm_postgresql_flexible_server.pokecloud.administrator_login
@@ -98,10 +98,6 @@ resource "azurerm_container_app" "backend" {
       env {
         name  = "DB_HOST_PORT"
         value = "${azurerm_postgresql_flexible_server.pokecloud.fqdn}:5432"
-      }
-      env {
-        name  = "API_KEY"
-        value = var.tgc_api_key
       }
       env {
         name  = "JWT_KEY"
