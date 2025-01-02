@@ -11,6 +11,15 @@ resource "azurerm_postgresql_flexible_server" "pokecloud" {
   storage_mb                   = 32768             # Taille de stockage (modifiable selon les besoins)
   backup_retention_days        = 7                 # Jours de rétention des sauvegardes
   geo_redundant_backup_enabled = false
+
+
+  lifecycle {
+    ignore_changes = [
+      zone,
+      high_availability.0.standby_availability_zone
+    ]
+  }
+
 }
 
 resource "azurerm_postgresql_flexible_server_database" "pokecloud" {
